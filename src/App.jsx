@@ -37,11 +37,9 @@ const App = () => {
   }, []);
 
   return (
-    <Router>
+    <Router basename="/Ecommerce-react"> {/* ADD basename here for GitHub Pages */}
       <div className='bg-white dark:bg-gray-900 dark:text-white duration-200'>
         <Navbar handleOrderPopup={handleOrderPopup} handleAuthPopup={handleAuthPopup}/>
-        
-        {/* State passed here is authPopup, which is correct */}
         <AuthPopup orderPopup={authPopup} setOrderPopup={setAuthPopup} />
         
         <Routes>
@@ -52,12 +50,9 @@ const App = () => {
               <TopProducts handleOrderPopup={handleOrderPopup}/>
               <Banner />
               <Subscribe/>
-              <Products />
               <Testimonials />
             </>
           } />
-
-          {/* This route will now work because UserDashboard is imported */}
           <Route path="/dashboard" element={<UserDashboard />} />
         </Routes>
         <Footer />
