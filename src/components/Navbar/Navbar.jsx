@@ -3,6 +3,8 @@ import Logo from '../../assets/logo.png'
 import { IoMdSearch } from "react-icons/io";
 import { FaCaretDown, FaCartShopping } from "react-icons/fa6";
 import DarkMode from './DarkMode.jsx';
+import { useLocation } from 'react-router-dom';
+
 const Menu = [
     {
         id:1,
@@ -47,7 +49,10 @@ const DropDownLinks = [
         link:"/#",
     },
 ]
-const Navbar = ({handleOrderPopup}) => {
+const Navbar = ({handleOrderPopup, handleAuthPopup}) => {
+    const location = useLocation();
+  // Check if current page is the dashboard
+  const isDashboard = location.pathname === "/dashboard";
   return (
     <div className="shadow-md bg-white dark:bg-gray-900 dark:text-white duration-200 relative z-40">
         {/* upper navbar */}
@@ -85,7 +90,8 @@ const Navbar = ({handleOrderPopup}) => {
         </div>
         {/* lower navbar */}
         <div data-aos="zoom-in" className="flex justify-center">
-            <ul className="sm:flex hidden items-center gap-4">
+            <div className='container flex justify-between items-center py-2'>
+                <ul className="sm:flex hidden items-center gap-4 mx-auto">
                 {
                 Menu.map((data)=>(
                     <li key={data.id}>
@@ -116,7 +122,17 @@ const Navbar = ({handleOrderPopup}) => {
                     </div>
                 </li>
             </ul>
-
+            {/* New Login Button - right end */}
+            {!isDashboard && (
+      <div className="hidden sm:block">
+        <button 
+          onClick={handleAuthPopup}
+          className="bg-primary text-white py-1 px-5 rounded-full hover:scale-105 duration-200">
+          Login
+        </button>
+      </div>
+    )}
+            </div>
         </div>
     </div>
   )
