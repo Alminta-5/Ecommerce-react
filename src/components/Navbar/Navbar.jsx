@@ -1,10 +1,11 @@
 import React from 'react'
+import  { useState } from 'react';
 import Logo from '../../assets/logo.png'
 import { IoMdSearch } from "react-icons/io";
 import { FaCaretDown, FaCartShopping } from "react-icons/fa6";
 import DarkMode from './DarkMode.jsx';
 import { useLocation } from 'react-router-dom';
-
+import { Link } from 'react-router-dom';
 const Menu = [
     {
         id:1,
@@ -28,7 +29,7 @@ const Menu = [
     },
     {
         id:5,
-        name:"Electronics",
+        name:"About us",
         link:"/#",
     }]
 
@@ -53,25 +54,75 @@ const Navbar = ({handleOrderPopup, handleAuthPopup}) => {
     const location = useLocation();
   // Check if current page is the dashboard
   const isDashboard = location.pathname === "/dashboard";
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filteredItems, setFilteredItems] = useState([]);
+  const [showDropdown, setShowDropdown] = useState(false);
+
+  // Combine lists or use a dedicated product array
+  const allSearchableItems = [...Menu, ...DropDownLinks];
+
+  const handleSearch = (e) => {
+    const value = e.target.value;
+    setSearchQuery(value);
+
+    if (value.trim() === "") {
+      setFilteredItems([]);
+      setShowDropdown(false);
+      return;
+    }
+
+    // Filter items based on the input string
+    const filtered = allSearchableItems.filter((item) =>
+      item.name.toLowerCase().includes(value.toLowerCase())
+    );
+
+    setFilteredItems(filtered);
+    setShowDropdown(true);
+  };
   return (
     <div className="shadow-md bg-white dark:bg-gray-900 dark:text-white duration-200 relative z-40">
         {/* upper navbar */}
         <div className="bg-primary/40 py-2">
             <div className="container flex justify-between items-center">
                 <div>
-                    <a href="#" className="font-bold text-2xl sm:text-3xl flex gap-2">
-                        <img src={Logo} alt="logo" className="w-10"/>
-                        Shopsy
-                    </a>
+                <Link to="/" className="font-bold text-2xl sm:text-3xl flex gap-2">
+                <img src={Logo} alt="logo" className="w-10"/>
+                    Shopsy
+                </Link>
                 </div>
                 {/* search bar */}
-                <div className="flex justify-between items-center gap-4">
+                <div className="flex justify-between items-center gap-2 sm:gap-4">
                     <div className="relative group hidden sm:block">
-                        <input type="text" placeholder="Search" className="w-[200px] sm:w-[200px] group-hover:w-[300px] 
+                        <input type="text" placeholder="Search"
+                        value={searchQuery}
+                        onChange={handleSearch} 
+                        className="w-[200px] sm:w-[200px] group-hover:w-[300px] 
                         transition-all duration-300 rounded-full border border-gray-300 
                         px-2 py-1 focus:outline-none focus:border-1 focus:border-primary  dark:border-gray-500 dark:bg-gray-800 "/>
                         <IoMdSearch className="text-gray-500 group-hover:text-primary absolute top-1/2 -translate-y-1/2 right-3"/>
-                    </div>
+                        {/* Dynamic Search Results List */}
+        {showDropdown && (
+        <div className="absolute top-10 w-full bg-white dark:bg-gray-800 shadow-md rounded-md overflow-hidden z-[9999]">
+            {filteredItems.length > 0 ? (
+                <ul>
+                    {filteredItems.map((item) => (
+                        <li key={item.id} className="hover:bg-primary/20">
+                            <a 
+                                href={item.link} 
+                                className="block px-4 py-2 text-sm text-gray-700 dark:text-white"
+                                onClick={() => setShowDropdown(false)}
+                            >
+                                {item.name}
+                            </a>
+                        </li>
+                    ))}
+                </ul>
+            ) : (
+                <div className="px-4 py-2 text-sm text-gray-500">No results found</div>
+            )}
+        </div>
+        )}
+        </div>
                 {/* order button  */}
                 <button onClick={()=> handleOrderPopup()}
                     className="bg-gradient-to-r from-primary to-secondary transition-all duration-200 
@@ -124,10 +175,10 @@ const Navbar = ({handleOrderPopup, handleAuthPopup}) => {
             </ul>
             {/* New Login Button - right end */}
             {!isDashboard && (
-      <div className="hidden sm:block">
+      <div className="block">
         <button 
           onClick={handleAuthPopup}
-          className="bg-primary text-white py-1 px-5 rounded-full hover:scale-105 duration-200">
+          className="bg-primary text-white py-1 px-3 sm:px-5 text-sm sm:text-base rounded-full hover:scale-105 duration-200">
           Login
         </button>
       </div>

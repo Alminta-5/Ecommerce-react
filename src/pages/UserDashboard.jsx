@@ -34,7 +34,7 @@ const UserDashboard = () => {
             {/* Logout Button */}
             <button 
               onClick={handleLogout}
-              className="flex items-center gap-2 bg-red-500 text-white px-4 py-2 rounded-full hover:bg-red-600 transition-all duration-200"
+              className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-full hover:scale-105 transition-all duration-200"
             >
               <FaSignOutAlt /> Logout
             </button>
