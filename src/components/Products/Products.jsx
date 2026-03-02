@@ -1,9 +1,9 @@
 import React from 'react'
-import Image1 from '../../assets/products/ethnic.png'
-import Image2 from '../../assets/products/womencasual.png'
-import Image3 from '../../assets/products/menformal.png'
-import Image4 from '../../assets/products/womenformal.png'
-import Image5 from '../../assets/products/mencasual.png'
+import Image1 from '../../assets/Products/ethnic.png'
+import Image2 from '../../assets/Products/womencasual.png'
+import Image3 from '../../assets/Products/menformal.png'
+import Image4 from '../../assets/Products/womenformal.png'
+import Image5 from '../../assets/Products/mencasual.png'
 import { FaStar } from "react-icons/fa";
 import { Link } from 'react-router-dom';
 const ProductsData = [
