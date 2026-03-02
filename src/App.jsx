@@ -5,7 +5,7 @@ import "aos/dist/aos.css";
 
 import Navbar from './components/Navbar/Navbar.jsx';
 import Hero from './components/Hero/Hero.jsx';
-import Products from './components/products/products.jsx';
+import Products from './components/Products/Products.jsx';
 import TopProducts from './components/TopProducts/TopProducts.jsx';
 import Banner from './components/Banner/Banner.jsx';
 import Subscribe from './components/Subscribe/Subscribe.jsx';
