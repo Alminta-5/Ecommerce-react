@@ -17,13 +17,8 @@ const Subscribe = () => {
             <div className="space-y-6 max-w-xl mx-auto">
                 <h1 className="text-2xl !text-center sm:text-left
                 sm:text-4xl font-semibold">
-                    Get Notified About New Products
+                    Explore Our Products
                 </h1>
-                <input data-aos="fade-up"
-                type="text"
-                placeholder="Enter your email"
-                className="w-full p-3"/>
-
             </div>
         </div>
     </div>

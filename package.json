@@ -15,7 +15,10 @@
     "@emailjs/browser": "^4.4.1",
     "@supabase/supabase-js": "^2.95.3",
     "aos": "^2.3.4",
+    "qrcode": "^1.5.4",
+    "razorpay": "^2.9.6",
     "react": "^19.2.0",
+    "react-countup": "^6.5.3",
     "react-dom": "^19.2.0",
     "react-icons": "^5.5.0",
     "react-router-dom": "^7.13.0",
@@ -34,6 +37,7 @@
     "gh-pages": "^6.3.0",
     "globals": "^16.5.0",
     "postcss": "^8.5.6",
+    "supabase": "^2.76.14",
     "tailwindcss": "^3.4.19",
     "vite": "^7.2.4"
   }

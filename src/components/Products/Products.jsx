@@ -4,46 +4,42 @@ import Image2 from '../../assets/products/womencasual.png'
 import Image3 from '../../assets/products/menformal.png'
 import Image4 from '../../assets/products/womenformal.png'
 import Image5 from '../../assets/products/mencasual.png'
-import {FaStar} from 'react-icons/fa6'
+import { FaStar } from "react-icons/fa";
+import { Link } from 'react-router-dom';
 const ProductsData = [
     {
         id:1,
         img:Image1,
         title:"Women Ethnics",
-        rating:4.5,
-        color:"white",
+        Price:"800",
         aosDelay:"0",
     },
     {
         id:2,
         img:Image2,
         title:"Women Casual",
-        rating:4.7,
-        color:"Red",
+        Price:"500",
         aosDelay:"200",
     },
     {
         id:3,
         img:Image3,
         title:"Men Formals",
-        rating:4.8,
-        color:"Brown",
+        Price:"1200",
         aosDelay:"400",
     },
     {
         id:4,
         img:Image4,
         title:"Women Formals",
-        rating:4.6,
-        color:"Pink",
+        Price:"1500",
         aosDelay:"600",
     },
     {
         id:5,
         img:Image5,
         title:"Men Casual",
-        rating:4.4,
-        color:"Yellow",
+        Price:"700",
         aosDelay:"800",
     },
 ];
@@ -73,10 +69,9 @@ const products = () => {
                             className="h-[220px] w-[150px] object-cover rounded-md"/>
                             <div>
                                 <h3 className="font-semibold">{data.title}</h3>
-                                <p className="text-sm text-gray-600">{data.color}</p>
                                 <div className="flex items-center gap-1">
                                     <FaStar className="text-yellow-400"/>
-                                    <span>{data.rating}</span>
+                                    <span>₹{data.Price}</span>
                                 </div>
                             </div>
                         </div>
@@ -84,12 +79,14 @@ const products = () => {
                 </div>
                 {/* View all products button */}
 <div className="flex justify-center mt-10" data-aos="fade-up" data-aos-delay="100">
-  <button
-    className="bg-primary text-white px-6 py-2 rounded-full 
-    hover:bg-primary/90 duration-200 ease-in-out hover:scale-105"
-  >
+  <Link to="/all-products">
+    <button
+      className="bg-primary text-white px-6 py-2 rounded-full 
+      hover:bg-primary/90 duration-200 ease-in-out hover:scale-105"
+    >
     View All Products
   </button>
+  </Link>
 </div>
 
             </div>

@@ -2,10 +2,9 @@ import { useNavigate } from 'react-router-dom';
 import React, { useState } from 'react';
 import { IoCloseOutline } from 'react-icons/io5';
 import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai';
-import emailjs from '@emailjs/browser';
 import { supabase } from '../../lib/supabaseClient'
 
-const AuthPopup = ({ orderPopup, setOrderPopup }) => {
+const AuthPopup = ({ orderPopup, setOrderPopup, setUser }) => {
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({
     name: "",
@@ -15,174 +14,198 @@ const AuthPopup = ({ orderPopup, setOrderPopup }) => {
   });
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
+
   const handleInput = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleAuthSubmit = (e) => {
-  e.preventDefault();
-  if (isLogin) {
-    handleLogin(e); // Calls the real Supabase Login
-  } else {
-    handleSignUp(e); // Calls the real Supabase Registration
-  }
-};
-const handleSignUp = async (e) => {
-  e.preventDefault();
-  
-  // 1. Fetch the user role ID
-  const { data: roleData, error: roleError } = await supabase
-    .from('roles')
-    .select('id')
-    .eq('role', 'user')
-    .maybeSingle();
+    e.preventDefault();
+    if (isLogin) {
+      handleLogin(e);
+    } else {
+      handleSignUp(e);
+    }
+  };
 
-  if (roleError || !roleData) {
-    alert("Internal Error: 'user' role not found in database.");
-    console.error("Role missing:", roleError);
-    return;
-  }
+  const handleSignUp = async (e) => {
+    e.preventDefault();
 
-  // 2. Register
-  const { data, error } = await supabase.auth.signUp({
-    email: formData.email,
-    password: formData.password,
-    options: {
-      data: {
-        full_name: formData.name,
-        phone: formData.phone,
-        role_id: roleData.id,
-      },
-    },
-  });
+    const { data: roleData, error: roleError } = await supabase
+      .from('roles')
+      .select('id')
+      .eq('role', 'user')
+      .maybeSingle();
 
-  if (error) {
-    alert("Registration Error: " + error.message);
-  } else {
-    alert("Success! Please log in.");
-    setIsLogin(true);
-  }
-};
-const handleLogin = async (e) => {
-  e.preventDefault();
-  
-  const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-    email: formData.email,
-    password: formData.password,
-  });
-
-  if (authError) {
-    alert("Login failed: " + authError.message);
-    return;
-  }
-
-  if (authData?.user) {
-    // We use a flat join to ensure compatibility
-    const { data: userData, error: userError } = await supabase
-      .from('Users') 
-      .select(`
-        full_name,
-        role_id,
-        roles!inner (
-          role
-        )
-      `)
-      .eq('id', authData.user.id)
-      .maybeSingle(); // maybeSingle prevents the "contains 0 rows" crash
-
-    if (userError || !userData) {
-      console.error("Login data fetch error:", userError);
-      setOrderPopup(false);
-      // Fallback to user dashboard if data is missing
-      navigate('/dashboard', { state: { name: authData.user.user_metadata.full_name || "User" } });
+    if (roleError || !roleData) {
+      alert("Internal Error: 'user' role not found in database.");
       return;
     }
 
-    setOrderPopup(false);
-    
-    // Safely check the role string
-    const roleName = userData.roles?.role;
+    const { data, error } = await supabase.auth.signUp({
+      email: formData.email,
+      password: formData.password,
+      options: {
+        data: {
+          full_name: formData.name,
+          phone: formData.phone,
+          role_id: roleData.id,
+        },
+      },
+    });
 
-    if (roleName === 'admin') {
-      navigate('/admin-dashboard');
+    if (error) {
+      alert("Registration Error: " + error.message);
     } else {
-      navigate('/dashboard', { state: { name: userData.full_name } });
+      alert("Success! Please log in.");
+      setIsLogin(true);
     }
-  }
-};
- const sendWelcomeEmail = (e) => {
-  const serviceId = 'service_f4miqbr'; 
-  const templateId = 'template_seupp8l'; 
-  const publicKey = 't5UzBCGrxoViNNq5V'; 
-
-  const templateParams = {
-    user_name: formData.name,
-    user_email: formData.email,
   };
 
-  emailjs.send(serviceId, templateId, templateParams, publicKey)
-    .then(() => {
-      console.log("Welcome email sent.");
-      // REMOVED: navigate('/dashboard') 
-    })
-    .catch((err) => {
-      console.error("Email failed:", err);
+  const handleLogin = async (e) => {
+    e.preventDefault();
+
+    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+      email: formData.email,
+      password: formData.password,
     });
-};
+
+    if (authError) {
+      alert("Login failed: " + authError.message);
+      return;
+    }
+
+    if (authData?.user) {
+      const { data: userData, error: userError } = await supabase
+        .from('Users')
+        .select(`full_name, role_id, roles!inner ( role )`)
+        .eq('id', authData.user.id)
+        .maybeSingle();
+
+      const displayName = userData?.full_name || authData.user.user_metadata.full_name || "User";
+      setUser({
+        id: authData.user.id,
+        name: displayName,
+        email: authData.user.email,
+        role: userData?.roles?.role || 'user'
+      });
+
+      setOrderPopup(false);
+
+      const roleName = userData.roles?.role;
+      if (roleName === 'admin') {
+        navigate('/admin/dashboard');
+      } else {
+        navigate('/dashboard', { state: { name: displayName } });
+      }
+    }
+  };
 
   return (
     <>
       {orderPopup && (
-        <div className="fixed top-0 left-0 w-screen h-screen bg-black/50 backdrop-blur-sm z-50 flex justify-center items-center">
-          <div className="bg-white dark:bg-gray-900 p-8 rounded-xl shadow-md w-[350px] relative">
-            <IoCloseOutline 
-              className="text-2xl cursor-pointer absolute top-4 right-4 dark:text-white" 
-              onClick={() => setOrderPopup(false)} 
+        // Backdrop
+        <div
+          className="fixed inset-0 w-screen h-screen bg-black/50 backdrop-blur-sm z-50 flex justify-center items-center px-4"
+          onClick={() => setOrderPopup(false)} // Close on backdrop click
+        >
+          {/* Modal Card */}
+          <div
+            className="bg-white dark:bg-gray-900 p-6 sm:p-8 rounded-2xl shadow-xl w-full max-w-sm relative"
+            onClick={(e) => e.stopPropagation()} // Prevent close when clicking inside
+          >
+            {/* Close Button */}
+            <IoCloseOutline
+              className="text-2xl cursor-pointer absolute top-4 right-4 dark:text-white hover:text-red-500 transition-colors"
+              onClick={() => setOrderPopup(false)}
             />
 
-            <h1 className="text-2xl font-bold mb-6 dark:text-white">
-                {isLogin ? "Login" : "Register"}
-            </h1>
+            {/* Title */}
+            <p className="text-sm text-gray-400 dark:text-gray-500 mb-6">
+              {isLogin
+                ? "Login to access your account"
+                : "Sign up to start shopping"}
+            </p>
 
-            <form onSubmit={handleAuthSubmit} className="space-y-4">
-                <input name="name" onChange={handleInput} type="text" placeholder="Full Name" className="w-full rounded-full border border-gray-300 dark:border-gray-500 dark:bg-gray-800 px-4 py-2 outline-none dark:text-white" required />
+            {/* Form */}
+            <form onSubmit={handleAuthSubmit} className="space-y-3">
+
+              {/* Name — signup only */}
               {!isLogin && (
-                <>
-                  <input name="phone" onChange={handleInput} type="number" placeholder="Phone Number" className="w-full rounded-full border border-gray-300 dark:border-gray-500 dark:bg-gray-800 px-4 py-2 outline-none dark:text-white" required />
-                  </>
+                <input
+                  name="name"
+                  onChange={handleInput}
+                  type="text"
+                  placeholder="Full Name"
+                  className="w-full rounded-xl border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white px-4 py-2.5 outline-none focus:border-primary text-sm"
+                  required
+                />
               )}
-              <input name="email" onChange={handleInput} type="email" placeholder="Email" className="w-full rounded-full border border-gray-300 dark:border-gray-500 dark:bg-gray-800 px-4 py-2 outline-none dark:text-white" required />
+
+              {/* Email */}
+              <input
+                name="email"
+                onChange={handleInput}
+                type="email"
+                placeholder="Email address"
+                className="w-full rounded-xl border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white px-4 py-2.5 outline-none focus:border-primary text-sm"
+                required
+              />
+
+              {/* Password */}
               <div className="relative">
                 <input
                   name="password"
                   type={showPassword ? 'text' : 'password'}
                   placeholder="Password"
                   onChange={handleInput}
-                  className="w-full rounded-full border border-gray-300 dark:border-gray-500 dark:bg-gray-800 px-4 py-2 outline-none dark:text-white pr-10"
+                  className="w-full rounded-xl border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white px-4 py-2.5 outline-none focus:border-primary text-sm pr-10"
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(s => !s)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 dark:text-gray-300"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-300 hover:text-primary transition-colors"
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
                   {showPassword ? <AiOutlineEyeInvisible size={18} /> : <AiOutlineEye size={18} />}
                 </button>
               </div>
-              
-              <button type="submit" className="w-full bg-gradient-to-r from-primary to-secondary text-white py-2 rounded-full font-bold hover:scale-105 duration-200">
+
+              {/* Submit */}
+              <button
+                type="submit"
+                className="w-full bg-gradient-to-r from-primary to-secondary text-white py-2.5 rounded-xl font-bold hover:scale-[1.02] active:scale-100 transition-all duration-200 text-sm mt-2"
+              >
                 {isLogin ? "Log In" : "Sign Up"}
               </button>
             </form>
 
-            <div className="text-center text-sm mt-6 dark:text-gray-400">
+            {/* Toggle login/signup */}
+            <div className="text-center text-sm mt-5 dark:text-gray-400">
               {isLogin ? (
-                <p>Not registered yet? <span className="text-primary font-bold cursor-pointer hover:underline" onClick={() => setIsLogin(false)}>Register here</span></p>
+                <p>
+                  Not registered yet?{' '}
+                  <span
+                    className="text-primary font-bold cursor-pointer hover:underline"
+                    onClick={() => setIsLogin(false)}
+                  >
+                    Register here
+                  </span>
+                </p>
               ) : (
-                <p>Already registered? <span className="text-primary font-bold cursor-pointer hover:underline" onClick={() => setIsLogin(true)}>Login here</span></p>
+                <p>
+                  Already registered?{' '}
+                  <span
+                    className="text-primary font-bold cursor-pointer hover:underline"
+                    onClick={() => setIsLogin(true)}
+                  >
+                    Login here
+                  </span>
+                </p>
               )}
             </div>
+
           </div>
         </div>
       )}
