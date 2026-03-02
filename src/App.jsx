@@ -18,7 +18,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import AdminProductsPage from './pages/AdminProductsPage.jsx';
 import AdminTopRated from './pages/AdminTopRated.jsx';
 import AdminLayout from './components/AdminLayout.jsx';
-import About from './pages/about.jsx';
+import About from './pages/About.jsx';
 import WomensWear from './pages/WomensWear.jsx';
 import KidsWear from './pages/KidsWear.jsx';
 import MensWear from './pages/MensWear.jsx';
